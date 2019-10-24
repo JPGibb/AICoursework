@@ -11,7 +11,7 @@ int number_of_caverns = 0;
 
 int main()
 {
-	std::cout << "Program started!" << std::endl;
+	std::cout << "Program started!" << std::endl; //@cleanup remove this
 
 	std::ifstream input_file("../../generated30-1/generated30-1.cav"); //@cleanup set this to open the correct file location
 
@@ -21,13 +21,16 @@ int main()
 	{
 		std::cout << "File opened" << std::endl; //@cleanup remove this
 
+		getline(input_file, line);
+
+		/*
 		while (!input_file.eof())
 		{
 			getline(input_file, line);
 		}
+		*/
 
-		//std::vector<int> caves;
-		std::vector<std::string> caves;
+		std::vector<int> caves;
 		std::string s;
 		for (int i = 0; i < line.size(); ++i)
 		{
@@ -37,18 +40,14 @@ int main()
 			}
 			else
 			{
-				
-				caves.push_back(s);
-				//caves.push_back(std::stoi(s));
-				
+				caves.push_back(std::stoi(s));
+				s = "";	
 			}
 		}
 
-		for (int i = 0; i < caves.size(); ++i)
-		{
-			std::cout << caves[i] << std::endl;
-		}
-		
+		number_of_caverns = caves[0];
+		caves.erase(caves.begin());
+	
 	}
 	else
 	{
