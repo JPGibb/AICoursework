@@ -7,6 +7,9 @@
 #include<string>
 #include<vector>
 
+
+void display_all_caverns();
+
 struct Cavern 
 {
 	int cav_num;
@@ -79,30 +82,36 @@ int main()
 			for (int j = 0; j < number_of_caverns - 1; ++j)
 			{
 				temp.push_back(table[j][i]);
-				std::cout << table[j][i];
 			}
 			matrix.push_back(temp);
 			temp.clear();
-			std::cout << std::endl;
 		}
 		
 		//Set up the Cavern structs with numbers and coords
 		int next_cav_num = 1;
 		for (int i = 0; i < number_of_caverns * 2; i+=2)
 		{
-			struct Cavern c;
-			c.cav_num = next_cav_num;
-			c.xcoord = coords[i];
-			c.ycoord = coords[i + 1];
+			struct Cavern *c = new Cavern;
+			c->cav_num = next_cav_num;
+			c->xcoord = coords[i];
+			c->ycoord = coords[i + 1];
+			//std::cout << "num " << c->cav_num << " x " << c->xcoord << " y " << c->ycoord << std::endl;
 			++next_cav_num;
-			caverns.push_back(c);
+			caverns.push_back(*c);
 		}
 
-		//add the connections to the caverns
-		for (int i = 0; i < caverns.size(); ++i)
+		//set up cavern connections
+		for (int i = 0; i < number_of_caverns - 1; ++i)
 		{
-			
+			for (int j = 0; j < number_of_caverns - 1; ++j)
+			{
+				if (matrix[i][j] == 1) 
+				{
+					caverns[i].connections.push_back(j + 1);
+				}
+			}
 		}
+		display_all_caverns();
 	}
 	else
 	{
@@ -110,4 +119,18 @@ int main()
 	}
 
 	return 0;
+}
+
+void display_all_caverns()
+{
+	for (int i = 0; i < caverns.size(); ++i) 
+	{
+		Cavern c = caverns[i];
+		std::cout << "num: " << c.cav_num << " x " << c.xcoord << " y " << c.ycoord << " Connections ";
+		for (int j = 0; j < c.connections.size(); ++j)
+		{
+			std::cout << c.connections[j] << " ";
+		}
+		std::cout << std::endl;
+	}
 }
