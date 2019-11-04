@@ -9,19 +9,21 @@
 
 
 void display_all_caverns();
+std::vector<int> clean_input(std::string);
+void build_matrix(std::vector<int>*);
+void setup_caverns();
 
 struct Cavern 
 {
-	int cav_num;
-	int xcoord;
-	int ycoord;
+	int cav_num = 0;
+	int xcoord = 0;
+	int ycoord = 0;
 	std::vector<int> connections;
 };
 
 int number_of_caverns = 0;
 std::vector<Cavern> caverns;
 std::vector<int> coords;
-//std::vector<int> matrix;
 std::vector<std::vector<int>> matrix;
 
 int main()
@@ -34,23 +36,8 @@ int main()
 	{
 		getline(input_file, line);
 
-		std::vector<int> cleaned_input;
-		std::string s;
-
-		//separate all the values from the file by comma
-		for (int i = 0; i < line.size(); ++i)
-		{
-			if (line[i] != ',')
-			{
-				s.push_back(line[i]);
-			}
-			else
-			{
-				cleaned_input.push_back(std::stoi(s));
-				s = "";	
-			}
-		}
-
+	
+		std::vector<int>cleaned_input = clean_input(line);
 		number_of_caverns = cleaned_input[0];
 		cleaned_input.erase(cleaned_input.begin());
 		
@@ -60,63 +47,16 @@ int main()
 			coords.push_back(cleaned_input[i]);
 		}
 
-		//Put all the matrix values into the matrix vector
-		//This creates a table similar to the one in coursework spec
-		//Each vector within the table vector is a row in the table
-		std::vector<int> v;
-		std::vector<std::vector<int>> table;
-		for (int i = number_of_caverns * 2; i < cleaned_input.size(); ++i)
-		{
-			v.push_back(cleaned_input[i]);
-			if (v.size() == 30)
-			{
-				table.push_back(v);
-				v.clear(); 
-			}
-		}
+		build_matrix(&cleaned_input);
 		
-		//set matrix vector to be conections for each to the caverns
-		std::vector<int> temp;
-		for (int i = 0; i < table.size(); ++i)
-		{
-			for (int j = 0; j < number_of_caverns - 1; ++j)
-			{
-				temp.push_back(table[j][i]);
-			}
-			matrix.push_back(temp);
-			temp.clear();
-		}
-		
-		//Set up the Cavern structs with numbers and coords
-		int next_cav_num = 1;
-		for (int i = 0; i < number_of_caverns * 2; i+=2)
-		{
-			struct Cavern *c = new Cavern;
-			c->cav_num = next_cav_num;
-			c->xcoord = coords[i];
-			c->ycoord = coords[i + 1];
-			//std::cout << "num " << c->cav_num << " x " << c->xcoord << " y " << c->ycoord << std::endl;
-			++next_cav_num;
-			caverns.push_back(*c);
-		}
-
-		//set up cavern connections
-		for (int i = 0; i < number_of_caverns - 1; ++i)
-		{
-			for (int j = 0; j < number_of_caverns - 1; ++j)
-			{
-				if (matrix[i][j] == 1) 
-				{
-					caverns[i].connections.push_back(j + 1);
-				}
-			}
-		}
-		display_all_caverns();
+		setup_caverns();
 	}
 	else
 	{
 		std::cout << "Did not manage to open the file";//@cleanup remove this
 	}
+
+	display_all_caverns();
 
 	return 0;
 }
@@ -132,5 +72,86 @@ void display_all_caverns()
 			std::cout << c.connections[j] << " ";
 		}
 		std::cout << std::endl;
+	}
+}
+
+std::vector<int> clean_input(std::string line)
+{
+	std::vector<int> cleaned_input;
+	std::string s;
+
+	//separate all the values from the file by comma
+	for (int i = 0; i < line.size(); ++i)
+	{
+		if (line[i] != ',')
+		{
+			s.push_back(line[i]);
+		}
+		else
+		{
+			cleaned_input.push_back(std::stoi(s));
+			s = "";
+		}
+	}
+
+	return cleaned_input;
+}
+
+void build_matrix(std::vector<int>* cleaned_input)
+{
+	//Put all the matrix values into the matrix vector
+	//This creates a table similar to the one in coursework spec
+	//Each vector within the table vector is a row in the table
+	std::vector<int> v;
+	std::vector<std::vector<int>> table;
+	std::vector<int>& vector_ref = *cleaned_input;//dereference the poitner so that the indexes of the vector can be accessed
+	for (int i = number_of_caverns * 2; i < cleaned_input->size(); ++i)
+	{
+		v.push_back(vector_ref[i]);
+		if (v.size() == 30)
+		{
+			table.push_back(v);
+			v.clear();
+		}
+	}
+
+	//set matrix vector to be conections for each to the caverns
+	std::vector<int> temp;
+	for (int i = 0; i < table.size(); ++i)
+	{
+		for (int j = 0; j < number_of_caverns - 1; ++j)
+		{
+			temp.push_back(table[j][i]);
+		}
+		matrix.push_back(temp);
+		temp.clear();
+	}
+}
+
+void setup_caverns()
+{
+	//Set up the Cavern structs with numbers and coords
+	int next_cav_num = 1;
+	for (int i = 0; i < number_of_caverns * 2; i += 2)
+	{
+		struct Cavern* c = new Cavern;
+		c->cav_num = next_cav_num;
+		c->xcoord = coords[i];
+		c->ycoord = coords[i + 1];
+		//std::cout << "num " << c->cav_num << " x " << c->xcoord << " y " << c->ycoord << std::endl;
+		++next_cav_num;
+		caverns.push_back(*c);
+	}
+
+	//set up cavern connections
+	for (int i = 0; i < number_of_caverns - 1; ++i)
+	{
+		for (int j = 0; j < number_of_caverns - 1; ++j)
+		{
+			if (matrix[i][j] == 1)
+			{
+				caverns[i].connections.push_back(j + 1);
+			}
+		}
 	}
 }
