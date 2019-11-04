@@ -12,6 +12,7 @@ void display_all_caverns();
 std::vector<int> clean_input(std::string);
 void build_matrix(std::vector<int>*);
 void setup_caverns();
+void a_star();
 
 struct Cavern 
 {
@@ -61,6 +62,7 @@ int main()
 	return 0;
 }
 
+//Display all the cavern data
 void display_all_caverns()
 {
 	for (int i = 0; i < caverns.size(); ++i) 
@@ -75,6 +77,7 @@ void display_all_caverns()
 	}
 }
 
+//Separate all the values of the file by comma and place them in a vector
 std::vector<int> clean_input(std::string line)
 {
 	std::vector<int> cleaned_input;
@@ -97,6 +100,7 @@ std::vector<int> clean_input(std::string line)
 	return cleaned_input;
 }
 
+//Create a matrix of all the oonnections
 void build_matrix(std::vector<int>* cleaned_input)
 {
 	//Put all the matrix values into the matrix vector
@@ -128,6 +132,7 @@ void build_matrix(std::vector<int>* cleaned_input)
 	}
 }
 
+//Set up caverns with ids, coords and connections
 void setup_caverns()
 {
 	//Set up the Cavern structs with numbers and coords
@@ -154,4 +159,9 @@ void setup_caverns()
 			}
 		}
 	}
+}
+
+void a_Star()
+{
+
 }
