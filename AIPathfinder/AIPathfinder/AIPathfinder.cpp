@@ -6,21 +6,22 @@
 #include<fstream>
 #include<string>
 #include<vector>
+#include<math.h>
 
-
-void display_all_caverns();
-std::vector<int> clean_input(std::string);
-void build_matrix(std::vector<int>*);
-void setup_caverns();
-void a_star();
-
-struct Cavern 
+struct Cavern
 {
 	int cav_num = 0;
 	int xcoord = 0;
 	int ycoord = 0;
 	std::vector<int> connections;
 };
+
+void display_all_caverns();
+std::vector<int> clean_input(std::string);
+void build_matrix(std::vector<int>*);
+void setup_caverns();
+void a_star();
+double calculate_distance(Cavern, Cavern);
 
 int number_of_caverns = 0;
 std::vector<Cavern> caverns;
@@ -57,8 +58,8 @@ int main()
 		std::cout << "Did not manage to open the file";//@cleanup remove this
 	}
 
-	display_all_caverns();
-
+	//display_all_caverns();
+	a_star();
 	return 0;
 }
 
@@ -161,7 +162,50 @@ void setup_caverns()
 	}
 }
 
-void a_Star()
+void a_star()
 {
+	std::vector<Cavern> open_list;
+	std::vector<Cavern> closed_list;
 
+	Cavern current = caverns[0];
+	open_list.push_back(current);
+
+	Cavern goal_node = caverns.back();
+
+	while (current.cav_num != goal_node.cav_num)
+	{
+		for (int i = 0; i < current.connections.size(); ++i)
+		{
+			std::cout << current.connections[i] - 1 << std::endl;
+			open_list.push_back(caverns[current.connections[i] - 1]);
+		}
+		break; //This will need to be removed later
+	}
+	
+}
+
+double calculate_distance(Cavern a, Cavern b)
+{
+	double x_dist = 0;
+	if (a.xcoord > b.xcoord) 
+	{
+		x_dist = a.xcoord - b.xcoord;
+	}
+	else
+	{
+		x_dist = b.xcoord - a.xcoord;
+	}
+	//std::cout << "xdist " << x_dist << std::endl;
+	double y_dist = 0;
+	if (a.ycoord > b.ycoord)
+	{
+		y_dist = a.ycoord - b.ycoord;
+	}
+	else
+	{
+		y_dist = b.ycoord - a.ycoord;
+	}
+	//std::cout << "ydist " << y_dist << std::endl;
+	
+	return sqrt((x_dist*x_dist) + (y_dist*y_dist));
 }
