@@ -13,6 +13,12 @@ struct Cavern
 	int cav_num = 0;
 	int xcoord = 0;
 	int ycoord = 0;
+
+	int g = 0;
+	int h = 0;
+	int f = 0;
+
+	int parent = 0;
 	std::vector<int> connections;
 };
 
@@ -22,6 +28,8 @@ void build_matrix(std::vector<int>*);
 void setup_caverns();
 void a_star();
 double calculate_distance(Cavern, Cavern);
+bool check_list(std::vector<Cavern>*, int);
+int get_lowest_f(std::vector<Cavern>*);
 
 int number_of_caverns = 0;
 std::vector<Cavern> caverns;
@@ -58,8 +66,8 @@ int main()
 		std::cout << "Did not manage to open the file";//@cleanup remove this
 	}
 
-	//display_all_caverns();
-	a_star();
+	display_all_caverns();
+	//a_star();
 	return 0;
 }
 
@@ -109,11 +117,12 @@ void build_matrix(std::vector<int>* cleaned_input)
 	//Each vector within the table vector is a row in the table
 	std::vector<int> v;
 	std::vector<std::vector<int>> table;
-	std::vector<int>& vector_ref = *cleaned_input;//dereference the poitner so that the indexes of the vector can be accessed
+	std::vector<int>& vector_ref = *cleaned_input;//dereference the pointer so that the indexes of the vector can be accessed
 	for (int i = number_of_caverns * 2; i < cleaned_input->size(); ++i)
 	{
+		std::cout << i <<std::endl;
 		v.push_back(vector_ref[i]);
-		if (v.size() == 30)
+		if (v.size() == number_of_caverns)
 		{
 			table.push_back(v);
 			v.clear();
@@ -124,10 +133,12 @@ void build_matrix(std::vector<int>* cleaned_input)
 	std::vector<int> temp;
 	for (int i = 0; i < table.size(); ++i)
 	{
-		for (int j = 0; j < number_of_caverns - 1; ++j)
+		for (int j = 0; j < number_of_caverns -1; ++j)
 		{
 			temp.push_back(table[j][i]);
+			std::cout << temp.back();
 		}
+		std::cout << std::endl;
 		matrix.push_back(temp);
 		temp.clear();
 	}
@@ -150,16 +161,30 @@ void setup_caverns()
 	}
 
 	//set up cavern connections
-	for (int i = 0; i < number_of_caverns - 1; ++i)
+	for (int i = 0; i < matrix.size(); ++i)
+	{
+		for (int j = 0; j < matrix.size(); ++j)
+		{
+			std::cout << "i " << i << " j " << j << std::endl;
+			if (matrix[i][j] == 1)
+			{
+				caverns[i].connections.push_back(j + 1);
+				std::cout << "c: " << caverns[i].cav_num << " conntects to " << j + 1 << std::endl;
+			}
+		}
+	}
+
+	/*for (int i = 0; i < number_of_caverns - 1; ++i)
 	{
 		for (int j = 0; j < number_of_caverns - 1; ++j)
 		{
 			if (matrix[i][j] == 1)
 			{
 				caverns[i].connections.push_back(j + 1);
+				std::cout << "c: " << caverns[i].cav_num << " conntects to " << j + 1 << std::endl;
 			}
 		}
-	}
+	}*/
 }
 
 void a_star()
@@ -167,19 +192,72 @@ void a_star()
 	std::vector<Cavern> open_list;
 	std::vector<Cavern> closed_list;
 
-	Cavern current = caverns[0];
-	open_list.push_back(current);
+	open_list.push_back(caverns[0]);
 
 	Cavern goal_node = caverns.back();
 
-	while (current.cav_num != goal_node.cav_num)
+	bool found = false;
+	while (open_list.size() != 0)
 	{
+
+		int current_index = get_lowest_f(&open_list);
+		Cavern current = open_list[current_index];
+		open_list.erase(open_list.begin() + current_index);
+		closed_list.push_back(current);
+
+		std::cout << current.parent << " -> " << current.cav_num << std::endl;
+
+
+		if (current.cav_num == goal_node.cav_num)
+		{
+			break;
+		}
+
 		for (int i = 0; i < current.connections.size(); ++i)
 		{
-			std::cout << current.connections[i] - 1 << std::endl;
-			open_list.push_back(caverns[current.connections[i] - 1]);
+
+			//std::cout << current.connections[i] - 1 << std::endl;
+			if (!check_list(&closed_list, current.connections[i]))
+			{
+
+				Cavern child = caverns[current.connections[i] - 1];
+
+				child.g = current.g + calculate_distance(current, child);
+				child.h = calculate_distance(child, goal_node);
+				child.f = child.g + child.h;
+				child.parent = current.cav_num;
+
+				if (child.cav_num == 30)
+				{
+					std::cout << "end here" << std::endl;
+				}
+
+				if (check_list(&open_list, child.cav_num))
+				{
+					//std::cout << "in the open list already" << std::endl;
+				}
+				else
+				{
+					//std::cout << "inserting " << current.connections[i] << std::endl;
+					open_list.push_back(child);
+				}
+
+				
+			}
 		}
-		break; //This will need to be removed later
+		//break; //This will need to be removed later
+	}
+	if (found)
+	{
+		std::cout <<  "Found the goal node" << std::endl;
+	}
+	else
+	{
+		std::cout <<  "Did not find the goal node" << std::endl;
+	}
+	for (int i = 0; i < closed_list.size(); ++i)
+	{
+		std::cout << closed_list[i].cav_num << std::endl;
 	}
 	
 }
@@ -208,4 +286,42 @@ double calculate_distance(Cavern a, Cavern b)
 	//std::cout << "ydist " << y_dist << std::endl;
 	
 	return sqrt((x_dist*x_dist) + (y_dist*y_dist));
+}
+
+bool check_list(std::vector<Cavern>* list, int n)
+{
+	std::vector<Cavern>& vec_ref = *list;
+
+	if (vec_ref.size() > 0)
+	{
+		for (int i = 0; i < vec_ref.size() - 1; ++i)
+		{
+			if (vec_ref[i].cav_num == n)
+			{
+				//found the value
+				//std::cout << "found: " << n << std::endl;
+				return true;
+			}
+		}
+	}
+	//std::cout << "not found " << n << std::endl;
+	return false;
+}
+
+int get_lowest_f(std::vector<Cavern>* open_list)
+{
+	std::vector<Cavern>& vec_ref = *open_list;
+
+	int lowest_f = 9999999999999;
+	int lowest_index = 0;
+	for (int i = 0; i < vec_ref.size(); ++i)
+	{
+		if (vec_ref[i].f < vec_ref[lowest_index].f)
+		{
+			lowest_f = vec_ref[i].f;
+			lowest_index = i;
+		}
+	}
+
+	return lowest_index;
 }
