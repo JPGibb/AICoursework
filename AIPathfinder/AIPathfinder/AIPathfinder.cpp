@@ -38,8 +38,8 @@ std::vector<std::vector<int>> matrix;
 
 int main()
 {
-	std::ifstream input_file("../../generated30-1/generated30-1.cav"); //@cleanup set this to open the correct file location
-
+	//std::ifstream input_file("../../generated30-1/generated30-1.cav"); //@cleanup set this to open the correct file location
+	std::ifstream input_file("../../cavernsfiles/input1.cav");
 	std::string line;
 
 	if (input_file.is_open())
@@ -49,6 +49,13 @@ int main()
 	
 		std::vector<int>cleaned_input = clean_input(line);
 		number_of_caverns = cleaned_input[0];
+		//std::cout << "cleaned " << cleaned_input.size() << std::endl;
+		/*for (int i = 0; i < cleaned_input.size(); ++i)
+		{
+			std::cout << cleaned_input[i];
+		}*/
+		std::cout<<std::endl;
+
 		cleaned_input.erase(cleaned_input.begin());
 		
 		//Loop thorugh all the coords in the caverns vector
@@ -60,14 +67,14 @@ int main()
 		build_matrix(&cleaned_input);
 		
 		setup_caverns();
+
+		//display_all_caverns();
+		a_star();
 	}
 	else
 	{
 		std::cout << "Did not manage to open the file";//@cleanup remove this
 	}
-
-	display_all_caverns();
-	//a_star();
 	return 0;
 }
 
@@ -91,21 +98,38 @@ std::vector<int> clean_input(std::string line)
 {
 	std::vector<int> cleaned_input;
 	std::string s;
-
+	int pushed_num = 0;
+	std::string temp = "";
 	//separate all the values from the file by comma
 	for (int i = 0; i < line.size(); ++i)
 	{
+		//std::cout << i << std::endl;
+		//std::cout << line[i];
 		if (line[i] != ',')
 		{
 			s.push_back(line[i]);
+			//std::cout << "pushing back " << line[i] << std::endl;
+			temp.push_back(line[i]);
+			pushed_num++;
 		}
 		else
 		{
+			
+			std::cout << "s " << s << std::endl;
 			cleaned_input.push_back(std::stoi(s));
 			s = "";
 		}
 	}
+	/*std::cout << "temp " << temp.size() << std::endl;
+	for (int i = 0; i < temp.size(); ++i)
+	{
+		std::cout << temp[i];
+	}
+	std::cout << std::endl;*/
+	//std::cout<<std::endl;
+	//std::cout << pushed_num <<std::endl;
 
+	cleaned_input.push_back(0);
 	return cleaned_input;
 }
 
@@ -122,7 +146,7 @@ void build_matrix(std::vector<int>* cleaned_input)
 	{
 		//std::cout << i <<std::endl;
 		v.push_back(vector_ref[i]);
-		std::cout << vector_ref[i] <<std::endl;
+		//std::cout << vector_ref[i] <<std::endl;
 		if (v.size() == number_of_caverns)
 		{
 			table.push_back(v);
@@ -168,13 +192,15 @@ void setup_caverns()
 	//set up cavern connections
 	for (int i = 0; i < matrix.size(); ++i)
 	{
-		for (int j = 0; j < matrix.size(); ++j)
+		std::cout << "i " << i << std::endl;
+		for (int j = 0; j < matrix[i].size(); ++j)
 		{
+			std::cout << "j " << j << std::endl;
 			//std::cout << "i " << i << " j " << j << std::endl;
 			if (matrix[i][j] == 1)
 			{
 				caverns[i].connections.push_back(j + 1);
-				//std::cout << "c: " << caverns[i].cav_num << " conntects to " << j + 1 << std::endl;
+				std::cout << "c: " << caverns[i].cav_num << " conntects to " << j + 1 << std::endl;
 			}
 		}
 	}
@@ -232,7 +258,7 @@ void a_star()
 				child.f = child.g + child.h;
 				child.parent = current.cav_num;
 
-				if (child.cav_num == 30)
+				if (child.cav_num == number_of_caverns)
 				{
 					std::cout << "end here" << std::endl;
 				}
