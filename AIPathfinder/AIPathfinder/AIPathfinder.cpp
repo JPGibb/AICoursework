@@ -120,8 +120,9 @@ void build_matrix(std::vector<int>* cleaned_input)
 	std::vector<int>& vector_ref = *cleaned_input;//dereference the pointer so that the indexes of the vector can be accessed
 	for (int i = number_of_caverns * 2; i < cleaned_input->size(); ++i)
 	{
-		std::cout << i <<std::endl;
+		//std::cout << i <<std::endl;
 		v.push_back(vector_ref[i]);
+		std::cout << vector_ref[i] <<std::endl;
 		if (v.size() == number_of_caverns)
 		{
 			table.push_back(v);
@@ -136,6 +137,10 @@ void build_matrix(std::vector<int>* cleaned_input)
 		for (int j = 0; j < number_of_caverns -1; ++j)
 		{
 			temp.push_back(table[j][i]);
+			if (temp.back() > 1)
+			{
+				std::cout << "??????\n";
+			}
 			std::cout << temp.back();
 		}
 		std::cout << std::endl;
@@ -165,11 +170,11 @@ void setup_caverns()
 	{
 		for (int j = 0; j < matrix.size(); ++j)
 		{
-			std::cout << "i " << i << " j " << j << std::endl;
+			//std::cout << "i " << i << " j " << j << std::endl;
 			if (matrix[i][j] == 1)
 			{
 				caverns[i].connections.push_back(j + 1);
-				std::cout << "c: " << caverns[i].cav_num << " conntects to " << j + 1 << std::endl;
+				//std::cout << "c: " << caverns[i].cav_num << " conntects to " << j + 1 << std::endl;
 			}
 		}
 	}
