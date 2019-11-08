@@ -15,9 +15,9 @@ struct Cavern
 	int xcoord = 0;
 	int ycoord = 0;
 
-	int g = 0;
-	int h = 0;
-	int f = 0;
+	double g = 0;
+	double h = 0;
+	double f = 0;
 
 	int parent = 0;
 	std::vector<int> connections;
@@ -28,6 +28,7 @@ std::vector<int> clean_input(std::string);
 void build_matrix(std::vector<int>*);
 void setup_caverns();
 void a_star();
+void reconstruct_path(Cavern);
 double calculate_distance(Cavern, Cavern);
 bool check_list(std::vector<Cavern>*, int);
 int get_lowest_f(std::vector<Cavern>*);
@@ -40,7 +41,8 @@ std::vector<std::vector<int>> matrix;
 int main()
 {
 	//std::ifstream input_file("../../generated30-1/generated30-1.cav"); //@cleanup set this to open the correct file location
-	std::ifstream input_file("../../cavernsfiles/input1.cav");
+	//std::ifstream input_file("../../cavernsfiles/input1.cav");
+	std::ifstream input_file("../../generated1000-1/generated1000-1.cav");
 	std::string line;
 
 	if (input_file.is_open())
@@ -79,7 +81,7 @@ void display_all_caverns()
 	for (int i = 0; i < caverns.size(); ++i) 
 	{
 		Cavern c = caverns[i];
-		std::cout << "num: " << c.cav_num << " x " << c.xcoord << " y " << c.ycoord << " Connections ";
+		std::cout << "num: " << c.cav_num << " x " << c.xcoord << " y " << c.ycoord << " Parent " << c.parent << " Connections ";
 		for (int j = 0; j < c.connections.size(); ++j)
 		{
 			std::cout << c.connections[j] << " ";
@@ -206,33 +208,69 @@ void a_star()
 			if (!check_list(&closed_list, current.connections[i]))
 			{
 
-				Cavern child = caverns[current.connections[i] - 1];
+				Cavern* child = &caverns[current.connections[i] - 1];
 
-				child.g = current.g + calculate_distance(current, child);
-				child.h = calculate_distance(child, goal_node);
-				child.f = child.g + child.h;
-				child.parent = current.cav_num;
-				if (check_list(&open_list, child.cav_num))
+				double g = current.g + calculate_distance(current, *child);
+
+				/*if (g < child->g || child->g == 0)
+				{
+					if(child->cav_num != number_of_caverns){ child->g = g; }
+					
+					child->parent = current.cav_num;
+				}*/
+				if (g < child->g || child->g == 0)
+				{
+					child->g = g;
+
+					child->parent = current.cav_num;
+				}
+
+				child->h = calculate_distance(*child, goal_node);
+				child->f = child->g + child->h;
+				
+
+				std::cout << "child " << child->cav_num << " parent " << current.cav_num << std::endl;
+				if (check_list(&open_list, child->cav_num))
 				{
 					//std::cout << "in the open list already" << std::endl;
 				}
 				else
 				{
 					//std::cout << "inserting " << current.connections[i] << std::endl;
-					open_list.push_back(child);
+					open_list.push_back(*child);
 				}
 			}
 		}
-		//break; //This will need to be removed later
 	}
 	if (found)
 	{
-		std::cout <<  "Found the goal node" << std::endl;
+		std::cout << "Found the goal node" << std::endl;
+		reconstruct_path(caverns[caverns.size() - 1]);
 	}
 	else
 	{
 		std::cout <<  "Did not find the goal node" << std::endl;
 	}	
+}
+
+void reconstruct_path(Cavern c)
+{
+	std::vector<int> path;
+	double distance = c.g;
+	display_all_caverns();
+	while (true)
+	{
+		path.push_back(c.cav_num);
+		if (c.cav_num == 1) { break; }
+		c = caverns[c.parent - 1];
+		
+	}
+	for (int i = path.size() - 1; i >= 0; --i)
+	{
+		std::cout << path[i] << " ";
+	}
+	std::cout << std::endl;
+	std::cout << "Distance = " << distance;
 }
 
 double calculate_distance(Cavern a, Cavern b)
