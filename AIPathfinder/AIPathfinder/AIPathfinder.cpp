@@ -192,12 +192,12 @@ void a_star()
 		open_list.erase(open_list.begin() + current_index);
 		closed_list.push_back(current);
 
-		std::cout << current.parent << " -> " << current.cav_num << std::endl;
+		//std::cout << current.parent << " -> " << current.cav_num << std::endl;
 
 
 		if (current.cav_num == goal_node.cav_num)
 		{
-			std::cout<< "found the node" <<std::endl;
+			//std::cout<< "found the node" <<std::endl;
 			found = true;
 			break;
 		}
@@ -229,7 +229,7 @@ void a_star()
 				child->f = child->g + child->h;
 				
 
-				std::cout << "child " << child->cav_num << " parent " << current.cav_num << std::endl;
+				//std::cout << "child " << child->cav_num << " parent " << current.cav_num << std::endl;
 				if (check_list(&open_list, child->cav_num))
 				{
 					//std::cout << "in the open list already" << std::endl;
@@ -257,7 +257,7 @@ void reconstruct_path(Cavern c)
 {
 	std::vector<int> path;
 	double distance = c.g;
-	display_all_caverns();
+	//display_all_caverns();
 	while (true)
 	{
 		path.push_back(c.cav_num);
@@ -299,6 +299,8 @@ double calculate_distance(Cavern a, Cavern b)
 	return sqrt((x_dist*x_dist) + (y_dist*y_dist));
 }
 
+
+//Checks if a cavern exists within a vector
 bool check_list(std::vector<Cavern>* list, int n)
 {
 	std::vector<Cavern>& vec_ref = *list;
@@ -319,6 +321,7 @@ bool check_list(std::vector<Cavern>* list, int n)
 	return false;
 }
 
+//Retruns the index of the cavern with the lowest f value in the open_list
 int get_lowest_f(std::vector<Cavern>* open_list)
 {
 	std::vector<Cavern>& vec_ref = *open_list;
@@ -327,6 +330,10 @@ int get_lowest_f(std::vector<Cavern>* open_list)
 	int lowest_index = 0;
 	for (int i = 0; i < vec_ref.size(); ++i)
 	{
+		if (vec_ref[i].cav_num == 655 || vec_ref[i].cav_num == 687)
+		{
+			std::cout << " cavern " << vec_ref[i].cav_num << " " << vec_ref[i].f << std::endl;
+		}
 		if (vec_ref[i].f < vec_ref[lowest_index].f)
 		{
 			lowest_f = vec_ref[i].f;
