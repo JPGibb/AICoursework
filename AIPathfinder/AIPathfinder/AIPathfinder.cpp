@@ -7,6 +7,7 @@
 #include<string>
 #include<vector>
 #include<math.h>
+#include<sstream>
 
 struct Cavern
 {
@@ -49,12 +50,6 @@ int main()
 	
 		std::vector<int>cleaned_input = clean_input(line);
 		number_of_caverns = cleaned_input[0];
-		//std::cout << "cleaned " << cleaned_input.size() << std::endl;
-		/*for (int i = 0; i < cleaned_input.size(); ++i)
-		{
-			std::cout << cleaned_input[i];
-		}*/
-		std::cout<<std::endl;
 
 		cleaned_input.erase(cleaned_input.begin());
 		
@@ -100,36 +95,15 @@ std::vector<int> clean_input(std::string line)
 	std::string s;
 	int pushed_num = 0;
 	std::string temp = "";
-	//separate all the values from the file by comma
-	for (int i = 0; i < line.size(); ++i)
-	{
-		//std::cout << i << std::endl;
-		//std::cout << line[i];
-		if (line[i] != ',')
-		{
-			s.push_back(line[i]);
-			//std::cout << "pushing back " << line[i] << std::endl;
-			temp.push_back(line[i]);
-			pushed_num++;
-		}
-		else
-		{
-			
-			std::cout << "s " << s << std::endl;
-			cleaned_input.push_back(std::stoi(s));
-			s = "";
-		}
-	}
-	/*std::cout << "temp " << temp.size() << std::endl;
-	for (int i = 0; i < temp.size(); ++i)
-	{
-		std::cout << temp[i];
-	}
-	std::cout << std::endl;*/
-	//std::cout<<std::endl;
-	//std::cout << pushed_num <<std::endl;
+	//separate all the values from the file by comma			
+	std::stringstream ss(line);
 
-	cleaned_input.push_back(0);
+    for (int i; ss >> i;) 
+	{
+        cleaned_input.push_back(i);    
+        if (ss.peek() == ',')
+            ss.ignore();
+    }
 	return cleaned_input;
 }
 
@@ -142,11 +116,11 @@ void build_matrix(std::vector<int>* cleaned_input)
 	std::vector<int> v;
 	std::vector<std::vector<int>> table;
 	std::vector<int>& vector_ref = *cleaned_input;//dereference the pointer so that the indexes of the vector can be accessed
+
 	for (int i = number_of_caverns * 2; i < cleaned_input->size(); ++i)
 	{
-		//std::cout << i <<std::endl;
 		v.push_back(vector_ref[i]);
-		//std::cout << vector_ref[i] <<std::endl;
+		
 		if (v.size() == number_of_caverns)
 		{
 			table.push_back(v);
@@ -156,18 +130,13 @@ void build_matrix(std::vector<int>* cleaned_input)
 
 	//set matrix vector to be conections for each to the caverns
 	std::vector<int> temp;
+
 	for (int i = 0; i < table.size(); ++i)
 	{
-		for (int j = 0; j < number_of_caverns -1; ++j)
+		for (int j = 0; j < number_of_caverns ; ++j)
 		{
 			temp.push_back(table[j][i]);
-			if (temp.back() > 1)
-			{
-				std::cout << "??????\n";
-			}
-			std::cout << temp.back();
 		}
-		std::cout << std::endl;
 		matrix.push_back(temp);
 		temp.clear();
 	}
@@ -192,30 +161,15 @@ void setup_caverns()
 	//set up cavern connections
 	for (int i = 0; i < matrix.size(); ++i)
 	{
-		std::cout << "i " << i << std::endl;
 		for (int j = 0; j < matrix[i].size(); ++j)
 		{
-			std::cout << "j " << j << std::endl;
 			//std::cout << "i " << i << " j " << j << std::endl;
 			if (matrix[i][j] == 1)
 			{
 				caverns[i].connections.push_back(j + 1);
-				std::cout << "c: " << caverns[i].cav_num << " conntects to " << j + 1 << std::endl;
 			}
 		}
 	}
-
-	/*for (int i = 0; i < number_of_caverns - 1; ++i)
-	{
-		for (int j = 0; j < number_of_caverns - 1; ++j)
-		{
-			if (matrix[i][j] == 1)
-			{
-				caverns[i].connections.push_back(j + 1);
-				std::cout << "c: " << caverns[i].cav_num << " conntects to " << j + 1 << std::endl;
-			}
-		}
-	}*/
 }
 
 void a_star()
@@ -241,13 +195,14 @@ void a_star()
 
 		if (current.cav_num == goal_node.cav_num)
 		{
+			std::cout<< "found the node" <<std::endl;
+			found = true;
 			break;
 		}
 
 		for (int i = 0; i < current.connections.size(); ++i)
 		{
 
-			//std::cout << current.connections[i] - 1 << std::endl;
 			if (!check_list(&closed_list, current.connections[i]))
 			{
 
@@ -257,12 +212,6 @@ void a_star()
 				child.h = calculate_distance(child, goal_node);
 				child.f = child.g + child.h;
 				child.parent = current.cav_num;
-
-				if (child.cav_num == number_of_caverns)
-				{
-					std::cout << "end here" << std::endl;
-				}
-
 				if (check_list(&open_list, child.cav_num))
 				{
 					//std::cout << "in the open list already" << std::endl;
@@ -272,8 +221,6 @@ void a_star()
 					//std::cout << "inserting " << current.connections[i] << std::endl;
 					open_list.push_back(child);
 				}
-
-				
 			}
 		}
 		//break; //This will need to be removed later
@@ -285,12 +232,7 @@ void a_star()
 	else
 	{
 		std::cout <<  "Did not find the goal node" << std::endl;
-	}
-	for (int i = 0; i < closed_list.size(); ++i)
-	{
-		std::cout << closed_list[i].cav_num << std::endl;
-	}
-	
+	}	
 }
 
 double calculate_distance(Cavern a, Cavern b)
@@ -343,7 +285,7 @@ int get_lowest_f(std::vector<Cavern>* open_list)
 {
 	std::vector<Cavern>& vec_ref = *open_list;
 
-	int lowest_f = 9999999999999;
+	int lowest_f = vec_ref[0].f;
 	int lowest_index = 0;
 	for (int i = 0; i < vec_ref.size(); ++i)
 	{
