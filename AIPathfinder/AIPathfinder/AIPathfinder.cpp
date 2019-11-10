@@ -205,31 +205,23 @@ void a_star()
 		for (int i = 0; i < current.connections.size(); ++i)
 		{
 
-			if (!check_list(&closed_list, current.connections[i]))
+			if (!check_list(&closed_list, current.connections[i]) )
 			{
-
 				Cavern* child = &caverns[current.connections[i] - 1];
 
 				double g = current.g + calculate_distance(current, *child);
 
-				/*if (g < child->g || child->g == 0)
-				{
-					if(child->cav_num != number_of_caverns){ child->g = g; }
-					
-					child->parent = current.cav_num;
-				}*/
 				if (g < child->g || child->g == 0)
 				{
-					child->g = g;
+					child->g = roundf(g * 100) / 100;
 
 					child->parent = current.cav_num;
 				}
 
-				child->h = calculate_distance(*child, goal_node);
-				child->f = child->g + child->h;
-				
+				child->h = roundf(calculate_distance(*child, goal_node) * 100) / 100;
+				//child->f = child->g + child->h;
+				child->f = roundf((child->g + child->h) * 100) / 100;
 
-				//std::cout << "child " << child->cav_num << " parent " << current.cav_num << std::endl;
 				if (check_list(&open_list, child->cav_num))
 				{
 					//std::cout << "in the open list already" << std::endl;
@@ -270,32 +262,17 @@ void reconstruct_path(Cavern c)
 		std::cout << path[i] << " ";
 	}
 	std::cout << std::endl;
-	std::cout << "Distance = " << distance;
+	std::cout << "Distance = " << distance << std::endl;
 }
 
 double calculate_distance(Cavern a, Cavern b)
 {
-	double x_dist = 0;
-	if (a.xcoord > b.xcoord) 
-	{
-		x_dist = a.xcoord - b.xcoord;
-	}
-	else
-	{
-		x_dist = b.xcoord - a.xcoord;
-	}
-	//std::cout << "xdist " << x_dist << std::endl;
-	double y_dist = 0;
-	if (a.ycoord > b.ycoord)
-	{
-		y_dist = a.ycoord - b.ycoord;
-	}
-	else
-	{
-		y_dist = b.ycoord - a.ycoord;
-	}
-	//std::cout << "ydist " << y_dist << std::endl;
+	double x_dist = a.xcoord - b.xcoord;
 	
+	double y_dist = a.ycoord - b.ycoord;
+
+	//std::cout << "Distance between " << a.cav_num << " and " << b.cav_num << " " << sqrt((x_dist*x_dist) + (y_dist*y_dist)) <<std::endl;
+
 	return sqrt((x_dist*x_dist) + (y_dist*y_dist));
 }
 
@@ -330,10 +307,10 @@ int get_lowest_f(std::vector<Cavern>* open_list)
 	int lowest_index = 0;
 	for (int i = 0; i < vec_ref.size(); ++i)
 	{
-		if (vec_ref[i].cav_num == 655 || vec_ref[i].cav_num == 687)
+		/*if (vec_ref[i].cav_num == 655 || vec_ref[i].cav_num == 687)
 		{
 			std::cout << " cavern " << vec_ref[i].cav_num << " " << vec_ref[i].f << std::endl;
-		}
+		}*/
 		if (vec_ref[i].f < vec_ref[lowest_index].f)
 		{
 			lowest_f = vec_ref[i].f;
