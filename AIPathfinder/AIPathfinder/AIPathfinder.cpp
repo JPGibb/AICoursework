@@ -43,6 +43,7 @@ int main()
 	//std::ifstream input_file("../../generated30-1/generated30-1.cav"); //@cleanup set this to open the correct file location
 	//std::ifstream input_file("../../cavernsfiles/input1.cav");
 	std::ifstream input_file("../../generated1000-1/generated1000-1.cav");
+	//std::ifstream input_file("../../generated100-1/generated100-1.cav");
 	std::string line;
 
 	if (input_file.is_open())
@@ -214,8 +215,9 @@ void a_star()
 				if (g < child->g || child->g == 0)
 				{
 					child->g = roundf(g * 100) / 100;
-
+					
 					child->parent = current.cav_num;
+					open_list.push_back(*child);
 				}
 
 				child->h = roundf(calculate_distance(*child, goal_node) * 100) / 100;
@@ -248,7 +250,8 @@ void a_star()
 void reconstruct_path(Cavern c)
 {
 	std::vector<int> path;
-	double distance = c.g;
+	//double distance = c.g;
+	double distance = caverns[c.parent - 1].g;
 	//display_all_caverns();
 	while (true)
 	{
@@ -267,6 +270,9 @@ void reconstruct_path(Cavern c)
 
 double calculate_distance(Cavern a, Cavern b)
 {
+	//if (b.cav_num == number_of_caverns)
+		//return 0;
+
 	double x_dist = a.xcoord - b.xcoord;
 	
 	double y_dist = a.ycoord - b.ycoord;
