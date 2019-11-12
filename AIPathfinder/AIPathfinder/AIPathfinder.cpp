@@ -39,8 +39,20 @@ std::vector<Cavern> caverns;
 std::vector<int> coords;
 std::vector<std::vector<int>> matrix;
 
-int main()
+int main(int argc, char* args[])
 {
+
+	std::cout << "argc " << argc << std::endl;
+	
+	if(argc > 0)
+	{
+		for (int i = 0; i < argc; ++i)
+		{
+			std::cout << args[i] << std::endl;
+		}
+	}
+	
+			
 	//std::ifstream input_file("../../generated30-1/generated30-1.cav"); //@cleanup set this to open the correct file location
 	//std::ifstream input_file("../../cavernsfiles/input1.cav");
 	std::ifstream input_file("../../generated1000-1/generated1000-1.cav");
