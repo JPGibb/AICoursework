@@ -29,6 +29,7 @@ void build_matrix(std::vector<int>*);
 void setup_caverns();
 void a_star();
 void reconstruct_path(Cavern);
+void output(std::string s);
 double calculate_distance(Cavern, Cavern);
 bool check_list(std::vector<Cavern>*, int);
 int get_lowest_f(std::vector<Cavern>*);
@@ -193,9 +194,6 @@ void a_star()
 		open_list.erase(open_list.begin() + current_index);
 		closed_list.push_back(current);
 
-		//std::cout << current.parent << " -> " << current.cav_num << std::endl;
-
-
 		if (current.cav_num == goal_node.cav_num)
 		{
 			//std::cout<< "found the node" <<std::endl;
@@ -205,7 +203,6 @@ void a_star()
 
 		for (int i = 0; i < current.connections.size(); ++i)
 		{
-
 			if (!check_list(&closed_list, current.connections[i]) )
 			{
 				Cavern* child = &caverns[current.connections[i] - 1];
@@ -258,14 +255,24 @@ void reconstruct_path(Cavern c)
 		path.push_back(c.cav_num);
 		if (c.cav_num == 1) { break; }
 		c = caverns[c.parent - 1];
-		
 	}
+	std::string s = "";
 	for (int i = path.size() - 1; i >= 0; --i)
 	{
 		std::cout << path[i] << " ";
+		s += std::to_string(path[i]);
+		s += " ";
 	}
 	std::cout << std::endl;
 	std::cout << "Distance = " << distance << std::endl;
+	output(s);
+}
+
+void output(std::string s)
+{
+	std::ofstream output_file("foo.bar");
+	output_file << s;
+	output_file.close();
 }
 
 double calculate_distance(Cavern a, Cavern b)
