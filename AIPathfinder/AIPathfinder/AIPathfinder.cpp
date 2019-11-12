@@ -38,32 +38,18 @@ int number_of_caverns = 0;
 std::vector<Cavern> caverns;
 std::vector<int> coords;
 std::vector<std::vector<int>> matrix;
+std::string file_name;
 
-int main(int argc, char* args[])
-{
 
-	std::cout << "argc " << argc << std::endl;
-	
-	if(argc > 0)
-	{
-		for (int i = 0; i < argc; ++i)
-		{
-			std::cout << args[i] << std::endl;
-		}
-	}
-	
-			
-	//std::ifstream input_file("../../generated30-1/generated30-1.cav"); //@cleanup set this to open the correct file location
-	//std::ifstream input_file("../../cavernsfiles/input1.cav");
-	std::ifstream input_file("../../generated1000-1/generated1000-1.cav");
-	//std::ifstream input_file("../../generated100-1/generated100-1.cav");
+int main(int argc, char* argv[])
+{				
+	file_name = argv[1];
+	std::ifstream input_file(file_name + ".cav");
 	std::string line;
 
 	if (input_file.is_open())
 	{
 		getline(input_file, line);
-
-	
 		std::vector<int>cleaned_input = clean_input(line);
 		number_of_caverns = cleaned_input[0];
 
@@ -79,12 +65,7 @@ int main(int argc, char* args[])
 		
 		setup_caverns();
 
-		//display_all_caverns();
 		a_star();
-	}
-	else
-	{
-		std::cout << "Did not manage to open the file";//@cleanup remove this
 	}
 	return 0;
 }
@@ -169,7 +150,7 @@ void setup_caverns()
 		c->cav_num = next_cav_num;
 		c->xcoord = coords[i];
 		c->ycoord = coords[i + 1];
-		//std::cout << "num " << c->cav_num << " x " << c->xcoord << " y " << c->ycoord << std::endl;
+		
 		++next_cav_num;
 		caverns.push_back(*c);
 	}
@@ -179,7 +160,6 @@ void setup_caverns()
 	{
 		for (int j = 0; j < matrix[i].size(); ++j)
 		{
-			//std::cout << "i " << i << " j " << j << std::endl;
 			if (matrix[i][j] == 1)
 			{
 				caverns[i].connections.push_back(j + 1);
@@ -208,7 +188,6 @@ void a_star()
 
 		if (current.cav_num == goal_node.cav_num)
 		{
-			//std::cout<< "found the node" <<std::endl;
 			found = true;
 			break;
 		}
@@ -230,16 +209,15 @@ void a_star()
 				}
 
 				child->h = roundf(calculate_distance(*child, goal_node) * 100) / 100;
-				//child->f = child->g + child->h;
+				
 				child->f = roundf((child->g + child->h) * 100) / 100;
 
 				if (check_list(&open_list, child->cav_num))
 				{
-					//std::cout << "in the open list already" << std::endl;
+					
 				}
 				else
 				{
-					//std::cout << "inserting " << current.connections[i] << std::endl;
 					open_list.push_back(*child);
 				}
 			}
@@ -247,21 +225,18 @@ void a_star()
 	}
 	if (found)
 	{
-		std::cout << "Found the goal node" << std::endl;
 		reconstruct_path(caverns[caverns.size() - 1]);
 	}
 	else
 	{
-		std::cout <<  "Did not find the goal node" << std::endl;
+		output("0");
 	}	
 }
 
 void reconstruct_path(Cavern c)
 {
 	std::vector<int> path;
-	//double distance = c.g;
-	double distance = caverns[c.parent - 1].g;
-	//display_all_caverns();
+	
 	while (true)
 	{
 		path.push_back(c.cav_num);
@@ -271,32 +246,25 @@ void reconstruct_path(Cavern c)
 	std::string s = "";
 	for (int i = path.size() - 1; i >= 0; --i)
 	{
-		std::cout << path[i] << " ";
 		s += std::to_string(path[i]);
 		s += " ";
 	}
-	std::cout << std::endl;
-	std::cout << "Distance = " << distance << std::endl;
+
 	output(s);
 }
 
 void output(std::string s)
 {
-	std::ofstream output_file("foo.bar");
+	std::ofstream output_file(file_name + ".csn");
 	output_file << s;
 	output_file.close();
 }
 
 double calculate_distance(Cavern a, Cavern b)
 {
-	//if (b.cav_num == number_of_caverns)
-		//return 0;
-
 	double x_dist = a.xcoord - b.xcoord;
 	
 	double y_dist = a.ycoord - b.ycoord;
-
-	//std::cout << "Distance between " << a.cav_num << " and " << b.cav_num << " " << sqrt((x_dist*x_dist) + (y_dist*y_dist)) <<std::endl;
 
 	return sqrt((x_dist*x_dist) + (y_dist*y_dist));
 }
@@ -314,16 +282,14 @@ bool check_list(std::vector<Cavern>* list, int n)
 			if (vec_ref[i].cav_num == n)
 			{
 				//found the value
-				//std::cout << "found: " << n << std::endl;
 				return true;
 			}
 		}
 	}
-	//std::cout << "not found " << n << std::endl;
 	return false;
 }
 
-//Retruns the index of the cavern with the lowest f value in the open_list
+//Returns the index of the cavern with the lowest f value in the open_list
 int get_lowest_f(std::vector<Cavern>* open_list)
 {
 	std::vector<Cavern>& vec_ref = *open_list;
@@ -332,10 +298,6 @@ int get_lowest_f(std::vector<Cavern>* open_list)
 	int lowest_index = 0;
 	for (int i = 0; i < vec_ref.size(); ++i)
 	{
-		/*if (vec_ref[i].cav_num == 655 || vec_ref[i].cav_num == 687)
-		{
-			std::cout << " cavern " << vec_ref[i].cav_num << " " << vec_ref[i].f << std::endl;
-		}*/
 		if (vec_ref[i].f < vec_ref[lowest_index].f)
 		{
 			lowest_f = vec_ref[i].f;
