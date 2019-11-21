@@ -8,6 +8,7 @@
 #include<vector>
 #include<math.h>
 #include<sstream>
+#include<map>
 
 struct Cavern
 {
@@ -33,6 +34,7 @@ void output(std::string s);
 double calculate_distance(Cavern, Cavern);
 bool check_list(std::vector<Cavern>*, int);
 int get_lowest_f(std::vector<Cavern>*);
+int get_lowest_f(std::map<int, Cavern>*);
 
 int number_of_caverns = 0;
 std::vector<Cavern> caverns;
@@ -170,11 +172,15 @@ void setup_caverns()
 
 void a_star()
 {
-	std::vector<Cavern> open_list;
-	std::vector<Cavern> closed_list;
+	//std::vector<Cavern> open_list;
+	std::map<int, Cavern> open_list;
+	//std::vector<Cavern> closed_list;
+	std::map<int, Cavern> closed_list;
 
-	open_list.push_back(caverns[0]);
-
+	///open_list.push_back(caverns[0]);
+	open_list.insert({caverns[0].cav_num, caverns[0]});
+	//std::cout << "inserting node " << caverns[0].cav_num << std::endl;
+	
 	Cavern goal_node = caverns.back();
 
 	bool found = false;
@@ -183,8 +189,11 @@ void a_star()
 
 		int current_index = get_lowest_f(&open_list);
 		Cavern current = open_list[current_index];
-		open_list.erase(open_list.begin() + current_index);
-		closed_list.push_back(current);
+		//std::cout << "ycoord " << current.ycoord << std::endl;
+		//open_list.erase(open_list.begin() + current_index);
+		open_list.erase(current.cav_num);
+		//closed_list.push_back(current);
+		closed_list.insert({current.cav_num, current});
 
 		if (current.cav_num == goal_node.cav_num)
 		{
@@ -194,7 +203,8 @@ void a_star()
 
 		for (int i = 0; i < current.connections.size(); ++i)
 		{
-			if (!check_list(&closed_list, current.connections[i]) )
+			//if (!check_list(&closed_list, current.connections[i]))
+			if(closed_list.find(current.connections[i]) == closed_list.end())
 			{
 				Cavern* child = &caverns[current.connections[i] - 1];
 
@@ -205,20 +215,25 @@ void a_star()
 					child->g = roundf(g * 100) / 100;
 					
 					child->parent = current.cav_num;
-					open_list.push_back(*child);
+					//open_list.push_back(*child);
+					open_list.insert({child->cav_num, *child});
+					//std::cout << "inserting node " << child->cav_num << std::endl;
 				}
 
 				child->h = roundf(calculate_distance(*child, goal_node) * 100) / 100;
 				
 				child->f = roundf((child->g + child->h) * 100) / 100;
 
-				if (check_list(&open_list, child->cav_num))
+				//if (check_list(&open_list, child->cav_num))
+				if(open_list.find(child->cav_num) != open_list.end())
 				{
 					
 				}
 				else
 				{
-					open_list.push_back(*child);
+					//open_list.push_back(*child);
+					open_list.insert({ child->cav_num, *child });
+					//std::cout << "inserting node " << child->cav_num << std::endl;
 				}
 			}
 		}
@@ -305,5 +320,23 @@ int get_lowest_f(std::vector<Cavern>* open_list)
 		}
 	}
 
+	return lowest_index;
+}
+
+int get_lowest_f(std::map<int, Cavern>* open_list)
+{
+	std::map<int, Cavern>& vec_ref = *open_list;
+	std::map<int, Cavern>::iterator it = vec_ref.begin();
+	int lowest_f = it->second.f;
+	int lowest_index = it->second.cav_num;
+	for (it; it != vec_ref.end(); ++it)
+	{
+		if(it->second.f < lowest_f)
+		{
+			lowest_f = it->second.f;
+			lowest_index = it->second.cav_num;
+		}
+	}
+	//std::cout << "lowest " << lowest_index << std::endl;
 	return lowest_index;
 }
